@@ -1,0 +1,31 @@
+body{
+    background-image: -moz-repeating-linear-gradient();
+}
+h2{
+    color:red;
+}
+.d{
+    border: brown;
+}
+.c1{
+    text-align: center;
+    color:olivedrab;
+}
+.c2{
+    color:orange;
+    text-align: center;
+}
+table{
+    table-layout: auto;
+    border: mediumblue;
+}
+th{
+    background-color:mediumturquoise;
+}
+.b :nth-child(even){
+    background-color: gainsboro;
+}
+.b :nth-child(odd){
+    background-color: grey;
+}
+
