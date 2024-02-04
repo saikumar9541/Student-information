@@ -1,0 +1,73 @@
+# This workflow will build a docker container, publish it to Google Container Registry, and deploy it to GKE when there is a push to the "main" branch.
+#
+# To configure this workflow:
+#
+# 1. Ensure that your repository contains the necessary configuration for your Google Kubernetes Engine cluster, including deployment.yml, kustomization.yml, service.yml, etc.
+#
+# 2. Create and configure a Workload Identity Provider for GitHub (https://github.com/google-github-actions/auth#setting-up-workload-identity-federation)
+#
+# 3. Change the values for the GAR_LOCATION, GKE_ZONE, GKE_CLUSTER, IMAGE, REPOSITORY and DEPLOYMENT_NAME environment variables (below).
+#
+# For more support on how to run the workflow, please visit https://github.com/google-github-actions/setup-gcloud/tree/master/example-workflows/gke-kustomize
+
+name: Build and Deploy to GKE
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  GAR_LOCATION: asia-south1 # TODO: update region of the Artifact Registry
+  GKE_CLUSTER: autopilot-cluster-1    # TODO: update to cluster name
+  GKE_ZONE: asia-south1-c   # TODO: update to cluster zone
+  DEPLOYMENT_NAME: gke-test # TODO: update to deployment name
+
+jobs:
+   build-push-gcr:
+    name: Build and Push to GCP
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Configure Workload Identity Federation and generate an access token.
+    - name: 'Authorize GCloud'
+      uses: 'google-github-actions/auth@v1'
+      with:
+        credentials_json: '${{ secrets.GKE_SA_KEY }}'
+
+        
+    - uses: google-github-actions/setup-gcloud@v1
+      with:
+        project_id: ${{ env.PROJECT_ID }}
+
+    - run: |-
+        gcloud --quiet auth configure-docker
+        gcloud auth configure-docker asia-south1-docker.pkg.dev --quiet
+
+        
+    - uses: google-github-actions/get-gke-credentials@v1
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_ZONE }}
+        project_id: ${{ env.PROJECT_ID }}
+        
+    - name: Build Docker Image
+      run: |-
+        docker build \
+          --tag "asia-south1-docker.pkg.dev/$PROJECT_ID/images/$IMAGE:$GITHUB_SHA" \
+          --tag "asia-south1-docker.pkg.dev/$PROJECT_ID/images/$IMAGE:latest" \
+          --build-arg GITHUB_SHA="$GITHUB_SHA" \
+          --build-arg GITHUB_REF="$GITHUB_REF" \
+          -f Dockerfile.dev
+          
+    - name: Push Docker Image to Artifact Registry
+      run: |-
+        docker push asia-south1-docker.pkg.dev/$PROJECT_ID/images/$IMAGE --all-tags
+        
+    - name: Restart Deployment
+      run: |-
+        kubectl rollout restart deployment $DEPLOYMENT_NAME
