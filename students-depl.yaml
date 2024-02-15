@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: students-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: students
+  template:
+    metadata:
+      labels:
+        app: students
+    spec:
+      containers:
+        - name: students
+          image: asia-south1-docker.pkg.dev/speedy-district-413015/images/students:latest
+          resources:
+            requests:
+              cpu: '100m'
+              memory: '100Mi'
+            limits:
+              cpu: 1000m
+              memory: 1000Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: students-srv
+spec:
+  selector:
+    app: students
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer
