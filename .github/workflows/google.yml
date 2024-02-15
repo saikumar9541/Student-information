@@ -67,7 +67,8 @@ jobs:
           
     - name: Push Docker Image to Artifact Registry
       run: |-
-        docker push asia-south1-docker.pkg.dev/$PROJECT_ID/images/$IMAGE --all-tags
+        docker push "asia-south1-docker.pkg.dev/$PROJECT_ID/images/$IMAGE:$GITHUB_SHA"
+        docker push "asia-south1-docker.pkg.dev/$PROJECT_ID/images/$IMAGE:latest"
         
     - name: Restart Deployment
       run: |-
