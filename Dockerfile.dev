@@ -1,8 +1,11 @@
-FROM node:18.14.2-alpine3.17
+FROM node:20.11.0-alpine3.18
 
 WORKDIR /app
 COPY package.json .
-RUN npm install
+RUN npm i -g @vercel/ncc
+RUN npm install --only=prod
 COPY . .
 
-CMD ["npm", "run", "start"]
+RUN ncc build src/index.ts -o dist
+
+CMD ["sh", "app.sh"]
