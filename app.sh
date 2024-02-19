@@ -4,7 +4,7 @@ if [ -n $NODE_ENV ]
 then
   if [ "$NODE_ENV" == "production" ]
   then
-    node dist/index.js
+    node dist/server.js
     exit
   elif [ "$NODE_ENV" == "development" ]
   then
