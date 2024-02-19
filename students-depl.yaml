@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: students
-          image: asia-south1-docker.pkg.dev/speedy-district-413015/images/students:latest
+          image: asia-south1-docker.pkg.dev/speedy-district-413015/students/students:latest
           resources:
             requests:
               cpu: '100m'
