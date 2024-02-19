@@ -45,8 +45,8 @@ jobs:
     - name: Build Docker Image
       run: |-
         docker build \
-          --tag "asia-south1-docker.pkg.dev/$PROJECT_ID/images/$IMAGE:$GITHUB_SHA" \
-          --tag "asia-south1-docker.pkg.dev/$PROJECT_ID/images/$IMAGE:latest" \
+          --tag "asia-south1-docker.pkg.dev/$PROJECT_ID/students/$IMAGE:$GITHUB_SHA" \
+          --tag "asia-south1-docker.pkg.dev/$PROJECT_ID/students/$IMAGE:latest" \
           --build-arg GITHUB_SHA="$GITHUB_SHA" \
           --build-arg GITHUB_REF="$GITHUB_REF" \
           -f Dockerfile .
